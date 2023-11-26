@@ -43,7 +43,7 @@ server = app.server
 header  = html.Div([ html.Div(
         className="app-header",
         children=[
-            html.H2('Bank Transactions Mock Data',
+            html.H2('Bank-Transactions Mock Data',
                      className="app-header--title")])
         ]
     )
