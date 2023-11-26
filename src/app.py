@@ -282,6 +282,5 @@ def return_text(fraud_option):
     
 
 
-app.run_server(debug=False)
-
-
+if __name__ == "__main__":
+    app.run_server(debug=True)
