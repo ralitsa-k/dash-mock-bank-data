@@ -5,7 +5,13 @@ import pandas as pd
 import numpy as np
 import plotly.express as px
 import dash_bootstrap_components as dbc
-
+import sys
+import os
+import sys
+sys.path.insert(0,'/data/')
+path = '/data/'
+os.environ['PATH'] += ':'+path
+plot_data = pd.read_csv(r".//src//data//second_release_full_data.csv")
 
 CONTENT_STYLE = {
     "margin-left": "25rem",
@@ -80,9 +86,9 @@ text = html.Div(html.H2(id = 'output_KPI'),className='column2', style = {'top':'
 top_row = html.Div([bar], style = CONTENT_STYLE, className='column1')
 
 rows = html.Div(
-    [dbc.Row([dbc.Col(top_row),
-              dbc.Col(html.H3(id='output_KPI'),className='column2')]),
-     dbc.Row([dbc.Col(html.Div(id = 'output2')),
+    # [dbc.Row([dbc.Col(top_row),
+    #           dbc.Col(html.H3(id='output_KPI'),className='column2')]),
+     [dbc.Row([dbc.Col(html.Div(id = 'output2')),
               dbc.Col(html.Div([html.Div(id='output')]))], style = CONTENT_STYLE)
     ]
 )
@@ -95,7 +101,7 @@ app.layout = html.Div([header, side, rows])
     Input('fraud_option', 'value'))
 def display_graph(fraud_option):
 
-    full_df1 = pd.read_csv('second_release_full_data.csv')
+    full_df1 = plot_data
 
     if fraud_option == 'fraud':
         full_df = full_df1.loc[full_df1.is_scam_transaction == 1,:]
@@ -145,15 +151,12 @@ def display_graph(fraud_option):
 
 
 
-
-
-
 @app.callback(
     Output("output2", "children"), 
     Input('fraud_option', 'value'))
 def display_graph2(fraud_option):
 
-    full_df1 = pd.read_csv('second_release_full_data.csv')
+    full_df1 = plot_data
 
     if fraud_option == 'fraud':
         full_df = full_df1.loc[full_df1.is_scam_transaction == 1,:]
@@ -199,85 +202,85 @@ def display_graph2(fraud_option):
 
 
 
-@app.callback(
-    Output("output_KPI", "children"), 
-    Input('fraud_option', 'value'))
-def return_text(fraud_option):
+# @app.callback(
+#     Output("output_KPI", "children"), 
+#     Input('fraud_option', 'value'))
+# def return_text(fraud_option):
 
-    full_df1 = pd.read_csv('second_release_full_data.csv')
+#     full_df1 = pd.read_csv('second_release_full_data.csv')
 
-    if fraud_option == 'fraud':
-        full_df = full_df1.loc[full_df1.is_scam_transaction == 1,:]
-    elif fraud_option == 'non-fraud':
-        full_df = full_df1.loc[full_df1.is_scam_transaction == 0,:]
-    value =  full_df.loc[full_df.type == 'spending', ['Amount']].sum().Amount
-    return f'Spent: £{value:,} '
-
-
+#     if fraud_option == 'fraud':
+#         full_df = full_df1.loc[full_df1.is_scam_transaction == 1,:]
+#     elif fraud_option == 'non-fraud':
+#         full_df = full_df1.loc[full_df1.is_scam_transaction == 0,:]
+#     value =  full_df.loc[full_df.type == 'spending', ['Amount']].sum().Amount
+#     return f'Spent: £{value:,} '
 
 
-@app.callback(
-    Output("output_ratio", "children"),
-    Input('fraud_option', 'value'))
-def return_text(fraud_option):
 
-    full_df1 = pd.read_csv('second_release_full_data.csv')
-    f_c = full_df1[['customer_id', 'customer_scammed']].drop_duplicates()
-    counts = f_c.groupby('customer_scammed').count().reset_index()
-    counts['customer_scammed'] = np.where(counts['customer_scammed']==1, 'scammed', 'not-scammed')
-    counts = counts.sort_values('customer_scammed', ascending = False)
+
+# @app.callback(
+#     Output("output_ratio", "children"),
+#     Input('fraud_option', 'value'))
+# def return_text(fraud_option):
+
+#     full_df1 = pd.read_csv('second_release_full_data.csv')
+#     f_c = full_df1[['customer_id', 'customer_scammed']].drop_duplicates()
+#     counts = f_c.groupby('customer_scammed').count().reset_index()
+#     counts['customer_scammed'] = np.where(counts['customer_scammed']==1, 'scammed', 'not-scammed')
+#     counts = counts.sort_values('customer_scammed', ascending = False)
 
     
-    counts1 = counts.loc[counts.customer_scammed == 'scammed', :]
-    counts2 = counts.loc[counts.customer_scammed == 'not-scammed', :]
+#     counts1 = counts.loc[counts.customer_scammed == 'scammed', :]
+#     counts2 = counts.loc[counts.customer_scammed == 'not-scammed', :]
 
-    if fraud_option == 'fraud':
-        colors = ['#cc3851', '#656565']
-        fig = px.bar(counts1.assign(bar = 1), x="customer_id", y = 'bar', text="customer_id", 
-                    color = "customer_scammed",orientation='h',hover_name = 'customer_scammed',
-                    hover_data={"customer_scammed":False, 'customer_id': False, 'bar':False},range_x=[0, 500],
-        color_discrete_sequence=colors)
+#     if fraud_option == 'fraud':
+#         colors = ['#cc3851', '#656565']
+#         fig = px.bar(counts1.assign(bar = 1), x="customer_id", y = 'bar', text="customer_id", 
+#                     color = "customer_scammed",orientation='h',hover_name = 'customer_scammed',
+#                     hover_data={"customer_scammed":False, 'customer_id': False, 'bar':False},range_x=[0, 500],
+#         color_discrete_sequence=colors)
     
     
-        bar2 = px.bar(counts2.assign(bar = 1), x="customer_id", y = 'bar', text="customer_id", 
-                    color = "customer_scammed",orientation='h',hover_name = 'customer_scammed',
-                    hover_data={"customer_scammed":False, 'customer_id': False, 'bar':False},range_x=[0, 500],
-                    color_discrete_sequence=['#656565', '#cc3851'])
-        fig.update_traces(textfont_size=20, textangle=0, cliponaxis=False, 
-                    textposition='auto',marker_line=dict(width=2, color='white'))
-        bar2.update_traces(textfont_size=20, textangle=0, cliponaxis=False, 
-                    textposition='auto')
-        fig.add_trace(bar2['data'][0])
+#         bar2 = px.bar(counts2.assign(bar = 1), x="customer_id", y = 'bar', text="customer_id", 
+#                     color = "customer_scammed",orientation='h',hover_name = 'customer_scammed',
+#                     hover_data={"customer_scammed":False, 'customer_id': False, 'bar':False},range_x=[0, 500],
+#                     color_discrete_sequence=['#656565', '#cc3851'])
+#         fig.update_traces(textfont_size=20, textangle=0, cliponaxis=False, 
+#                     textposition='auto',marker_line=dict(width=2, color='white'))
+#         bar2.update_traces(textfont_size=20, textangle=0, cliponaxis=False, 
+#                     textposition='auto')
+#         fig.add_trace(bar2['data'][0])
 
-    elif fraud_option == 'non-fraud':
+#     elif fraud_option == 'non-fraud':
         
-        colors = ['#656565', '#cc3851']
-        fig = px.bar(counts1.assign(bar = 1), x="customer_id", y = 'bar', text="customer_id", 
-                    color = "customer_scammed",orientation='h',hover_name = 'customer_scammed',
-                    hover_data={"customer_scammed":False, 'customer_id': False, 'bar':False},range_x=[0, 500],
-        color_discrete_sequence=colors)
+#         colors = ['#656565', '#cc3851']
+#         fig = px.bar(counts1.assign(bar = 1), x="customer_id", y = 'bar', text="customer_id", 
+#                     color = "customer_scammed",orientation='h',hover_name = 'customer_scammed',
+#                     hover_data={"customer_scammed":False, 'customer_id': False, 'bar':False},range_x=[0, 500],
+#         color_discrete_sequence=colors)
     
     
-        bar2 = px.bar(counts2.assign(bar = 1), x="customer_id", y = 'bar', text="customer_id", 
-                    color = "customer_scammed",orientation='h',hover_name = 'customer_scammed',
-                    hover_data={"customer_scammed":False, 'customer_id': False, 'bar':False},range_x=[0, 500],
-                    color_discrete_sequence=['#cc3851', '#656565'])
-        bar2.update_traces(textfont_size=20, textangle=0, cliponaxis=False, 
-                        textposition='auto',marker_line=dict(width=2, color='white'))
-        fig.add_trace(bar2['data'][0])
-        fig.update_traces(textfont_size=20, textangle=0, cliponaxis=False, 
-                        textposition='auto')
-    fig.update_layout(plot_bgcolor='#222222',
-                      paper_bgcolor = '#222222',
-                      template = "plotly_dark",
-                      margin=dict(l=50, r=100, t=20, b=30),
-                      xaxis_visible=False, yaxis_visible = False, 
-                      autosize=False, width=900, height = 110, 
-                      legend_title = None,
-                      legend_font_size = 15)
+#         bar2 = px.bar(counts2.assign(bar = 1), x="customer_id", y = 'bar', text="customer_id", 
+#                     color = "customer_scammed",orientation='h',hover_name = 'customer_scammed',
+#                     hover_data={"customer_scammed":False, 'customer_id': False, 'bar':False},range_x=[0, 500],
+#                     color_discrete_sequence=['#cc3851', '#656565'])
+#         bar2.update_traces(textfont_size=20, textangle=0, cliponaxis=False, 
+#                         textposition='auto',marker_line=dict(width=2, color='white'))
+#         fig.add_trace(bar2['data'][0])
+#         fig.update_traces(textfont_size=20, textangle=0, cliponaxis=False, 
+#                         textposition='auto')
+#     fig.update_layout(plot_bgcolor='#222222',
+#                       paper_bgcolor = '#222222',
+#                       template = "plotly_dark",
+#                       margin=dict(l=50, r=100, t=20, b=30),
+#                       xaxis_visible=False, yaxis_visible = False, 
+#                       autosize=False, width=900, height = 110, 
+#                       legend_title = None,
+#                       legend_font_size = 15)
         
     
-    return dcc.Graph(figure=fig)
+#     return dcc.Graph(figure=fig)
 
     
 
